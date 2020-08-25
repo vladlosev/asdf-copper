@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-# TODO: Ensure this is the correct GitHub homepage where releases can be downloaded for copper.
+# GitHub homepage where releases can be downloaded for copper.
 GH_REPO="https://github.com/cloud66-oss/copper"
 
 fail() {
@@ -12,7 +12,6 @@ fail() {
 
 curl_opts=(-fsSL)
 
-# NOTE: You might want to remove this if copper is not hosted on GitHub releases.
 if [ -n "${GITHUB_API_TOKEN:-}" ]; then
   curl_opts=("${curl_opts[@]}" -H "Authorization: token $GITHUB_API_TOKEN")
 fi
@@ -29,9 +28,18 @@ list_github_tags() {
 }
 
 list_all_versions() {
-  # TODO: Adapt this. By default we simply list the tag names from GitHub releases.
-  # Change this function if copper has other means of determining installable versions.
-  list_github_tags
+  list_github_tags | grep -v '^0[.]'
+}
+
+get_download_url() {
+  local version="$1"
+
+  local platform
+
+  platform="$(uname | tr '[:upper:]' '[:lower:]')"
+  local filename="${platform}_amd64_$version"
+
+  echo "https://github.com/cloud66-oss/copper/releases/download/${version}/${filename}"
 }
 
 download_release() {
@@ -39,8 +47,7 @@ download_release() {
   version="$1"
   filename="$2"
 
-  # TODO: Adapt the release URL convention for copper
-  url="$GH_REPO/archive/v${version}.tar.gz"
+  url="$(get_download_url "$version")"
 
   echo "* Downloading copper release $version..."
   curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
@@ -55,18 +62,12 @@ install_version() {
     fail "asdf-copper supports release installs only"
   fi
 
-  # TODO: Adapt this to proper extension and adapt extracting strategy.
-  local release_file="$install_path/copper-$version.tar.gz"
   (
-    mkdir -p "$install_path"
-    download_release "$version" "$release_file"
-    tar -xzf "$release_file" -C "$install_path" --strip-components=1 || fail "Could not extract $release_file"
-    rm "$release_file"
+    local install_file="$install_path/bin/copper"
 
-    # TODO: Asert copper executable exists.
-    local tool_cmd
-    tool_cmd="$(echo "copper version" | cut -d' ' -f2-)"
-    test -x "$install_path/bin/$tool_cmd" || fail "Expected $install_path/bin/$tool_cmd to be executable."
+    mkdir -p "$install_path/bin"
+    download_release "$version" "$install_file"
+    chmod 755 "$install_file"
 
     echo "copper $version installation was successful!"
   ) || (
