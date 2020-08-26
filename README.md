@@ -1,6 +1,6 @@
 <div align="center">
 
-# asdf-copper ![Build](https://github.com/vladlosev/asdf-copper/workflows/Build/badge.svg) ![Lint](https://github.com/vladlosev/asdf-copper/workflows/Lint/badge.svg)
+# asdf-copper [![Build](https://github.com/vladlosev/asdf-copper/workflows/Build/badge.svg)](https://github.com/vladlosev/asdf-copper/actions?query=workflow%3ABuild) [![Lint](https://github.com/vladlosev/asdf-copper/workflows/Lint/badge.svg)](https://github.com/vladlosev/asdf-copper/actions?query=workflow%3ALint)
 
 [copper](https://help.cloud66.com/copper/) plugin for the [asdf version manager](https://asdf-vm.com).
 
